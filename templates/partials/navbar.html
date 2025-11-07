@@ -1,0 +1,40 @@
+{% load static %}
+
+<nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom shadow-sm">
+  <div class="container-fluid">
+
+    <!-- Sidebar Toggle -->
+    <button class="btn btn-outline-primary me-2" id="menu-toggle">☰</button>
+
+    <!-- Welcome + Avatar Section -->
+    <div class="d-flex align-items-center ms-auto">
+      {% if user.is_authenticated %}
+        <span class="me-3 text-muted">
+          Welcome, {{ user.first_name|default:user.username|title }}
+        </span>
+        <img src="{% static 'img/avatar.png' %}" 
+             alt="User Avatar" 
+             class="rounded-circle border" 
+             width="40" height="40">
+      {% else %}
+        <span class="me-3 text-muted">Welcome, Guest</span>
+        <img src="{% static 'img/avatar.png' %}" 
+             alt="Default Avatar" 
+             class="rounded-circle border" 
+             width="40" height="40">
+      {% endif %}
+    </div>
+
+    <!-- Login / Logout Buttons -->
+    <div class="ms-3">
+      {% if user.is_authenticated %}
+        <form method="post" action="{% url 'logout' %}" class="d-inline">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-outline-danger btn-sm">Logout</button>
+        </form>
+      {% else %}
+        <a href="{% url 'login' %}" class="btn btn-outline-primary btn-sm">Login</a>
+      {% endif %}
+    </div>
+  </div>
+</nav>

@@ -1,0 +1,32 @@
+
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Dashboard | SSB CRM{% endblock %}
+{% block content %}
+<div class="row">
+  <div class="col-md-3 mb-3">
+    <div class="card p-3 text-center">
+      <h5>Total Leads</h5>
+      <h2>134</h2>
+    </div>
+  </div>
+  <div class="col-md-3 mb-3">
+    <div class="card p-3 text-center">
+      <h5>Network Members</h5>
+      <h2>42</h2>
+    </div>
+  </div>
+  <div class="col-md-3 mb-3">
+    <div class="card p-3 text-center">
+      <h5>Commissions</h5>
+      <h2>$1,320</h2>
+    </div>
+  </div>
+  <div class="col-md-3 mb-3">
+    <div class="card p-3 text-center">
+      <h5>Pending Leads</h5>
+      <h2>19</h2>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,35 @@
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #F8FAFC;
+    color: #2D3748;
+}
+
+#sidebar {
+    width: 250px;
+    transition: all 0.3s;
+}
+
+#sidebar.collapsed {
+    margin-left: -250px;
+}
+
+.nav-link {
+    border-radius: 6px;
+    margin-bottom: 4px;
+}
+
+.nav-link:hover {
+    background-color: #1A73E8;
+    color: #fff !important;
+}
+
+.navbar {
+    background: linear-gradient(90deg, #1A73E8, #00C4A7);
+    color: #fff;
+}
+
+.card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}{% if creating %}Create Lead{% else %}Edit Lead{% endif %}{% endblock %}
+{% block content %}
+<div class="container">
+  <h3>{% if creating %}Create Lead{% else %}Edit Lead{% endif %}</h3>
+  <form method="post">{% csrf_token %}
+    {{ form.non_field_errors }}
+    <div class="mb-3">
+      {{ form.name.label_tag }} {{ form.name }} {{ form.name.errors }}
+    </div>
+    <div class="mb-3">
+      {{ form.email.label_tag }} {{ form.email }} {{ form.email.errors }}
+    </div>
+    <div class="mb-3">
+      {{ form.phone.label_tag }} {{ form.phone }} {{ form.phone.errors }}
+    </div>
+    <div class="mb-3">
+      {{ form.assigned_to.label_tag }} {{ form.assigned_to }} {{ form.assigned_to.errors }}
+    </div>
+    <div class="mb-3">
+      {{ form.status.label_tag }} {{ form.status }} {{ form.status.errors }}
+    </div>
+    <div class="mb-3">
+      {{ form.notes.label_tag }} {{ form.notes }} {{ form.notes.errors }}
+    </div>
+    <button class="btn btn-primary" type="submit">Save</button>
+    <a href="{% url 'crm:lead_list' %}" class="btn btn-secondary">Cancel</a>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+{% load static %}
+{% load reports_extras %}
+{% block title %}Reports{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Saved Reports</h2>
+    <a href="{% url 'reports:report_builder' %}" class="btn btn-outline-primary">Create Report</a>
+  </div>
+
+  <table class="table table-striped table-hover">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Name</th>
+        <th>Model</th>
+        <th>Created By</th>
+        <th>Created At</th>
+        <th>Schedule</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for rpt in reports %}
+      <tr id="report-row-{{ rpt.pk }}">
+        <td>{{ rpt.pk }}</td>
+        <td><a href="{% url 'reports:report_detail' report_id=rpt.pk %}">{{ rpt.name }}</a></td>
+        <td>{{ rpt.model }}</td>
+        <td>{{ rpt.created_by }}</td>
+        <td>{{ rpt.created_at|date:"Y-m-d H:i" }}</td>
+        <td>{{ rpt.schedule|default:"—" }}</td>
+        <!-- <td>
+          <button class="btn btn-sm btn-primary export-btn" data-id="{{ rpt.pk }}">
+            Export
+          </button>
+          <a class="btn btn-sm btn-secondary" href="{% url 'reports:export_list' %}">Exports</a>
+        </td> -->
+
+        <td>
+        {% if rpt.latest_export %}
+            {% if rpt.latest_export.status == 'done' and rpt.latest_export.file_path %}
+            <!-- Download button if the latest export is done -->
+            <a class="btn btn-sm btn-success" href="{% url 'reports:download_export' export_id=rpt.latest_export.pk %}">Download</a>
+            <span class="small text-muted ms-2">{{ rpt.latest_export.filename }}</span>
+            {% elif rpt.latest_export.status == 'running' %}
+            <button class="btn btn-sm btn-outline-secondary" disabled>Running</button>
+            <a class="btn btn-sm btn-secondary ms-1" href="{% url 'reports:export_list' %}">Exports</a>
+            {% elif rpt.latest_export.status == 'queued' %}
+            <button class="btn btn-sm btn-outline-secondary" disabled>Queued</button>
+            <a class="btn btn-sm btn-secondary ms-1" href="{% url 'reports:export_list' %}">Exports</a>
+            {% elif rpt.latest_export.status == 'error' %}
+            <button class="btn btn-sm btn-warning export-btn" data-id="{{ rpt.pk }}">Retry Export</button>
+            <a class="btn btn-sm btn-secondary ms-1" href="{% url 'reports:export_list' %}">Exports</a>
+            {% else %}
+            <!-- fallback -->
+            <button class="btn btn-sm btn-primary export-btn" data-id="{{ rpt.pk }}">Export</button>
+            <a class="btn btn-sm btn-secondary ms-1" href="{% url 'reports:export_list' %}">Exports</a>
+            {% endif %}
+        {% else %}
+            <!-- no previous export -> allow export -->
+            <button class="btn btn-sm btn-primary export-btn" data-id="{{ rpt.pk }}">Export</button>
+            <a class="btn btn-sm btn-secondary ms-1" href="{% url 'reports:export_list' %}">Exports</a>
+        {% endif %}
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="7" class="text-center">No reports found.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div id="export-messages" class="mt-3"></div>
+</div>
+
+<script>
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+const csrftoken = getCookie('csrftoken');
+
+document.addEventListener('DOMContentLoaded', function() {
+  const buttons = document.querySelectorAll('.export-btn');
+
+  buttons.forEach(btn => {
+    const reportId = btn.dataset.id;
+
+    // Helper to poll status_url until done/error
+    async function pollStatus(statusUrl, btnEl) {
+      try {
+        const res = await fetch(statusUrl, { credentials: 'same-origin' });
+        if (!res.ok) throw new Error('Status fetch failed: ' + res.status);
+        const data = await res.json();
+        if (data.status === 'done' && data.download_url) {
+          // replace button with Download link
+          const a = document.createElement('a');
+          a.className = 'btn btn-sm btn-success';
+          a.href = data.download_url;
+          a.textContent = 'Download';
+          btnEl.replaceWith(a);
+          const info = document.createElement('div');
+          info.className = 'small text-muted mt-1';
+          info.textContent = 'Ready: ' + (data.filename || '');
+          // insert after the new link
+          a.parentNode.insertBefore(info, a.nextSibling);
+          return;
+        } else if (data.status === 'error') {
+          btnEl.disabled = false;
+          btnEl.textContent = 'Export';
+          const msg = document.createElement('div');
+          msg.className = 'alert alert-danger mt-2';
+          msg.textContent = 'Export failed: ' + (data.error || 'unknown');
+          document.getElementById('export-messages').prepend(msg);
+          return;
+        } else {
+          // still queued or running -> poll again
+          setTimeout(() => pollStatus(statusUrl, btnEl), 2000);
+        }
+      } catch (err) {
+        console.error('pollStatus error', err);
+        // try again later
+        setTimeout(() => pollStatus(statusUrl, btnEl), 3000);
+      }
+    }
+
+    btn.addEventListener('click', async function() {
+      const btnEl = this;
+      btnEl.disabled = true;
+      const origText = btnEl.textContent;
+      btnEl.textContent = 'Queueing...';
+
+      // build the enqueue url directly (Django url uses /report/<id>/export/)
+      const enqueueUrl = `/reports/report/${reportId}/export/`;
+      try {
+        const resp = await fetch(enqueueUrl, {
+          method: 'POST',
+          headers: {
+            'X-CSRFToken': csrftoken,
+            'Accept': 'application/json',
+          },
+          credentials: 'same-origin',
+        });
+        const data = await resp.json();
+        if (resp.ok && data.export_id) {
+          btnEl.textContent = 'Queued';
+          // start polling the status URL returned by server OR fallback to constructed URL
+          const statusUrl = data.status_url || `/reports/export/${data.export_id}/status/`;
+          // immediate poll (in case it's already done)
+          pollStatus(statusUrl, btnEl);
+        } else {
+          btnEl.disabled = false;
+          btnEl.textContent = origText;
+          const msg = document.createElement('div');
+          msg.className = 'alert alert-danger';
+          msg.textContent = 'Failed to queue export: ' + (data.error || resp.statusText || 'unknown');
+          document.getElementById('export-messages').prepend(msg);
+        }
+      } catch (err) {
+        btnEl.disabled = false;
+        btnEl.textContent = origText;
+        const msg = document.createElement('div');
+        msg.className = 'alert alert-danger';
+        msg.textContent = 'Request failed: ' + err;
+        document.getElementById('export-messages').prepend(msg);
+      }
+    });
+
+    // Optional: If you want to detect exports already created for this report and auto-show them,
+    // you could call an endpoint that returns latest export for the report on page load.
+  });
+});
+</script>
+
+
+{% endblock %}

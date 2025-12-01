@@ -1,0 +1,29 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+{% block title %}MLM Tree Visualization{% endblock %}
+{% block content %}
+  <link rel="stylesheet" href="{% static 'mlm/css/mlm.css' %}">
+
+<script>
+  window.MLM_TREE_CONFIG = {
+    apiSubtreeUrlTemplate: "{% url 'mlm:api_subtree' 0 %}".replace('/0/', '/{node_id}/')
+  };
+  window.MLM_INIT_ADMIN_NODE = {% if root_id %}{{ root_id }}{% else %}null{% endif %};
+</script>
+
+<script>
+  (function loadD3ThenTree(){
+    function loadTree(){
+      var s = document.createElement('script'); s.src = "{% static 'mlm/js/tree_d3.js' %}"; s.defer=true; document.head.appendChild(s);
+    }
+    var local = document.createElement('script'); local.src = "{% static 'mlm/js/d3.v7.min.js' %}";
+    local.onload = function(){ loadTree(); };
+    local.onerror = function(){
+      var cdn = document.createElement('script'); cdn.src = "https://d3js.org/d3.v7.min.js"; cdn.onload = loadTree; document.head.appendChild(cdn);
+    };
+    document.head.appendChild(local);
+  })();
+</script>
+
+  </script>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3>Exports</h3>
+<table class="table">
+  <thead><tr><th>ID</th><th>Report</th><th>Requested</th><th>Status</th><th>File</th></tr></thead>
+  <tbody>
+    {% for e in exports %}
+    <tr>
+      <td>{{ e.pk }}</td>
+      <td>{{ e.report.name }}</td>
+      <td>{{ e.requested_by }}</td>
+      <td>{{ e.status }}</td>
+      <td>
+        {% if e.status == 'done' and e.file_path %}
+          <a href="{% url 'reports:download_export' e.pk %}" class="btn btn-sm btn-success">Download</a>
+        {% else %}
+          <span class="text-muted">Not ready</span>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

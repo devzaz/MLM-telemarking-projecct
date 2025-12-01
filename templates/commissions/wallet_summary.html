@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Commissions / Wallets{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{% static 'commissions/css/commissions.css' %}">
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Commissions & Wallets</h2>
+    <a class="btn btn-outline-secondary" href="{% url 'admin:commissions_commission_changelist' %}">Open Admin</a>
+  </div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-md-3">
+      <div class="kpi-card">
+        <h6>Total Wallet Balance</h6>
+        <div class="kpi-value">{{ total_balance }}</div>
+        <small class="text-muted">Funds available for payout</small>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="kpi-card">
+        <h6>Total Commissions</h6>
+        <div class="kpi-value">{{ total_commissions }}</div>
+        <small class="text-muted">All commissions recorded</small>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="kpi-card">
+        <h6>Pending</h6>
+        <div class="kpi-value">{{ pending }}</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="kpi-card">
+        <h6>Approved</h6>
+        <div class="kpi-value">{{ approved }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card mb-3">
+    <div class="card-body">
+      <h5 class="card-title">Approvals (last 14 days)</h5>
+      <canvas id="commissionsMiniChart"></canvas>
+    </div>
+  </div>
+
+  <div class="mb-3">
+    <a href="{% url 'commissions:commission_history' %}" class="btn btn-primary">Open Commission History</a>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  (function () {
+    const labels = {{ chart_labels|safe }};
+    const data = {{ chart_data|safe }};
+    const canvas = document.getElementById('commissionsMiniChart');
+    if (!canvas) return;
+
+    // Ensure canvas parent has a computed height (CSS above). Then init Chart.
+    const ctx = canvas.getContext('2d');
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          data: data,
+          fill: true,
+          tension: 0.3,
+          borderColor: 'rgba(34,197,94,0.9)',
+          backgroundColor: 'rgba(34,197,94,0.12)',
+          pointRadius: 0
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false, // we rely on CSS height above
+        aspectRatio: 3,             // fallback if aspect ratio gets used
+        animation: { duration: 350 },
+        plugins: { legend: { display: false } },
+        scales: { x: { display: false }, y: { display: true, beginAtZero: true, ticks: { precision: 0 } } }
+      }
+    });
+  })();
+</script>
+
+</script>
+{% endblock %}

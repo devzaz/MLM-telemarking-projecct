@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<div class="container py-4">
+  <h3>Your Network</h3>
+  {% if node %}
+    <div id="user-tree" style="width:100%; height:600px;"></div>
+
+    <script>
+      window.MLM_TREE_CONFIG = {
+        apiSubtreeUrlTemplate: "{% url 'mlm:api_subtree' 0 %}".replace('/0/', '/{node_id}/')
+      };
+      window.MLM_INIT_NODE = {{ node.id }};
+    </script>
+
+    <script>
+      (function loadD3AndTree(){
+        function loadTreeScript(){
+          var s = document.createElement('script');
+          s.src = "{% static 'mlm/js/tree_d3.js' %}";
+          s.defer = true;
+          document.head.appendChild(s);
+        }
+        var local = document.createElement('script');
+        local.src = "{% static 'mlm/js/d3.v7.min.js' %}";
+        local.onload = function(){ console.log('Loaded local d3'); loadTreeScript(); };
+        local.onerror = function(){
+          console.warn('Local D3 not found. Loading from CDN...');
+          var cdn = document.createElement('script');
+          cdn.src = "https://d3js.org/d3.v7.min.js";
+          cdn.crossOrigin = "anonymous";
+          cdn.onload = function(){ console.log('Loaded d3 from CDN'); loadTreeScript(); };
+          cdn.onerror = function(){ console.error('Failed to load D3 from CDN'); };
+          document.head.appendChild(cdn);
+        };
+        document.head.appendChild(local);
+      })();
+    </script>
+
+  {% else %}
+    <div class="alert alert-warning">You do not have a network node yet. Contact admin to be placed.</div>
+  {% endif %}
+</div>
+{% endblock %}

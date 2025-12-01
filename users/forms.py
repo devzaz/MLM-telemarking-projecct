@@ -5,6 +5,11 @@ from .models import User
 
 class UserRegisterForm(UserCreationForm):
     email = forms.EmailField()
+    referral_code = forms.CharField(
+        max_length=12, required=False,
+        label='Referral code (optional)',
+        widget=forms.TextInput(attrs={'placeholder': 'Enter referral code', 'class': 'form-control'})
+    )
 
     class Meta:
         model = User

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Lead - {{ lead.name }}{% endblock %}
+{% block content %}
+<div class="container">
+  <h3>{{ lead.name }}</h3>
+  <p><strong>Email:</strong> {{ lead.email }}</p>
+  <p><strong>Phone:</strong> {{ lead.phone }}</p>
+  <p><strong>Status:</strong> {{ lead.get_status_display }}</p>
+  <p><strong>Assigned:</strong> {{ lead.assigned_to }}</p>
+
+  <h5>Notes</h5>
+  <form method="post">{% csrf_token %}
+    {{ note_form.as_p }}
+    <button class="btn btn-sm btn-primary" name="add_note">Add note</button>
+  </form>
+
+  <ul class="list-group mt-3">
+    {% for note in lead.lead_notes.all %}
+      <li class="list-group-item">
+        <strong>{{ note.author }}</strong> — {{ note.created_at|date:"Y-m-d H:i" }}<br/>
+        {{ note.text }}
+      </li>
+    {% empty %}
+      <li class="list-group-item">No notes yet.</li>
+    {% endfor %}
+  </ul>
+
+  <div class="mt-3">
+    <a class="btn btn-outline-secondary" href="{% url 'crm:lead_update' lead.pk %}">Edit</a>
+    <a class="btn btn-outline-primary" href="{% url 'crm:lead_list' %}">Back to list</a>
+  </div>
+</div>
+{% endblock %}

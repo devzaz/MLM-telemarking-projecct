@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Partner Onboarding — Referrals{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{% static 'referrals/css/referrals.css' %}">
+<div class="container py-4">
+  <div class="d-flex justify-content-between mb-3">
+    <div><h2>Partner Onboarding</h2><p class="text-muted">Quick guide to integrate with our referral tracking API.</p></div>
+    <div><a class="btn btn-outline-secondary" href="{% url 'referrals:referrals_dashboard_page' %}">Back to dashboard</a></div>
+  </div>
+
+  <div class="card mb-3">
+    <div class="card-body">
+      <h5 class="card-title">Overview</h5>
+      <p>When your site confirms an order, call our server-to-server API to record conversions. Use either the visitor <code>referral_token</code> (if available) or the referrer's <code>referral_code</code>.</p>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-md-6">
+      <div class="card mb-3">
+        <div class="card-body">
+          <h6>Endpoint</h6>
+          <pre class="code-block">POST {{ request.scheme }}://{{ request.get_host }}{% url 'referrals:api_record_conversion' %}</pre>
+          <p class="mb-1"><strong>Headers</strong></p>
+          <pre class="code-block">X-REF-SHARED-SECRET: &lt;YOUR_SHARED_SECRET&gt;
+Content-Type: application/json</pre>
+        </div>
+      </div>
+
+      <div class="card mb-3">
+        <div class="card-body">
+          <h6>JSON Body Example</h6>
+          <pre class="code-block">{
+  "token": "abcd1234token",
+  "referral_code": "REFABC1",
+  "external_order_id": "ORDER-123",
+  "amount": "49.99",
+  "metadata": {"plan":"pro","utm":"spring"}
+}</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card mb-3">
+        <div class="card-body">
+          <h6>curl Example</h6>
+          <pre class="code-block">curl -X POST "{{ request.scheme }}://{{ request.get_host }}{% url 'referrals:api_record_conversion' %}" \
+-H "Content-Type: application/json" \
+-H "X-REF-SHARED-SECRET: &lt;YOUR_SHARED_SECRET&gt;" \
+-d '{"token":"abcd","external_order_id":"ORD1","amount":"29.99"}'</pre>
+        </div>
+      </div>
+
+      <div class="card mb-3">
+        <div class="card-body">
+          <h6>Notes & recommended best practices</h6>
+          <ul>
+            <li>Always supply a unique <code>external_order_id</code> to avoid duplicates.</li>
+            <li>Keep the shared secret private. Use environment variables to store it.</li>
+            <li>Prefer server-to-server integration (most reliable & secure).</li>
+            <li>If you can't access the token, send the referrer's <code>referral_code</code> instead.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card mt-3">
+    <div class="card-body">
+      <h6>Testing</h6>
+      <p>To test, ask your admin to create a referrer user and share their <code>referral_code</code>, then call the endpoint with that code or a token from the cookie.</p>
+      <a class="btn btn-primary" href="{% url 'referrals:referrals_dashboard_page' %}">Open Referrals Dashboard</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

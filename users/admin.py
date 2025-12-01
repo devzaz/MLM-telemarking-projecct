@@ -10,3 +10,5 @@ class UserAdmin(admin.ModelAdmin):
     def approve_users(self, request, queryset):
         count = queryset.update(is_approved=True)
         self.message_user(request, f"{count} users approved.")
+
+

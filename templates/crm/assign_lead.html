@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+  <h3>Assign Lead: {{ lead.name }}</h3>
+  <form method="post">{% csrf_token %}
+    <div class="mb-3">
+      <label for="user_id">Select telemarketer</label>
+      <select name="user_id" id="user_id" class="form-select">
+        {% for tm in telemarketers %}
+          <option value="{{ tm.id }}" {% if lead.assigned_to and lead.assigned_to.id == tm.id %}selected{% endif %}>{{ tm.username }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <button class="btn btn-primary">Assign</button>
+  </form>
+</div>
+{% endblock %}

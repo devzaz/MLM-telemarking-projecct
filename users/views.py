@@ -8,11 +8,16 @@ import uuid
 
 
 def register(request):
+    get_ref = request.GET.get('ref')
     if request.method =='POST':
         form = UserRegisterForm(request.POST)
         if form.is_valid():
             user = form.save(commit=False)
             user.is_active = False
+            # attach referral code temporarily so mlm.signals can pick it up
+            ref = form.cleaned_data.get('referral_code') or get_ref
+            if ref:
+                user._mlm_referral_code = ref.strip()
             user.save()
             verification_token = str(uuid.uuid4())
             request.session['verify_token'] = verification_token
@@ -26,8 +31,11 @@ def register(request):
             messages.success(request, 'Please check your email to verify your account.')
             return redirect('login')
     else:
+        initial = {}
+        if get_ref:
+            initial['referral_code'] = get_ref
         form = UserRegisterForm()
-    return render(request, 'users/register.html', {'form': form})
+    return render(request, 'users/register.html', {'form': form, 'ref': get_ref})
 
 
 

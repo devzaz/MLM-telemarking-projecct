@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3>Report builder</h3>
+<form method="post">
+  {% csrf_token %}
+  <div class="mb-2">
+    <label>Name</label>
+    <input name="name" class="form-control"/>
+  </div>
+  <div class="mb-2">
+    <label>Model</label>
+    <select name="model" class="form-control">
+      {% for m in models %}
+      <option value="{{ m }}">{{ m }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="mb-2">
+    <label>Filters (JSON)</label>
+    <textarea name="filters_json" class="form-control" rows="6">[{"field":"created_at","op":"gte","value":"2025-11-01"}]</textarea>
+    <small class="text-muted">Use simple format: [{"field":"amount","op":"gte","value":10}]</small>
+  </div>
+  <button class="btn btn-primary">Save report</button>
+</form>
+{% endblock %}

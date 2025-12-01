@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="row g-3">
+    <!-- Summary cards -->
+    <div class="col-12 col-md-3">
+      <div class="card p-3 shadow-sm h-100">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <h6 class="mb-1">Total Users</h6>
+            <h3 id="card-users">—</h3>
+            <small class="text-muted">New 30d: <span id="card-users-new">—</span></small>
+          </div>
+          <div>
+            <i class="fa-solid fa-users fa-2x text-primary"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-md-3">
+      <div class="card p-3 shadow-sm h-100">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <h6 class="mb-1">Leads</h6>
+            <h3 id="card-leads">—</h3>
+            <small class="text-muted">Converted: <span id="card-leads-conv">—</span></small>
+          </div>
+          <div>
+            <i class="fa-solid fa-address-book fa-2x text-success"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-md-3">
+      <div class="card p-3 shadow-sm h-100">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <h6 class="mb-1">Commissions</h6>
+            <h3 id="card-commissions">—</h3>
+            <small class="text-muted">Paid: <span id="card-commissions-paid">—</span></small>
+          </div>
+          <div><i class="fa-solid fa-wallet fa-2x text-warning"></i></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-md-3">
+      <div class="card p-3 shadow-sm h-100">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <h6 class="mb-1">Referrals</h6>
+            <h3 id="card-referrals">—</h3>
+            <small class="text-muted">30d: <span id="card-referrals-30">—</span></small>
+          </div>
+          <div><i class="fa-solid fa-link fa-2x text-info"></i></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts row -->
+  <div class="row mt-4 g-3">
+    <div class="col-12 col-lg-6">
+      <div class="card p-3 h-100 shadow-sm">
+        <div class="d-flex justify-content-between">
+          <h6>Leads (last 7 days)</h6>
+          <small class="text-muted">Trend</small>
+        </div>
+        <canvas id="leadsChart" height="160"></canvas>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-6">
+      <div class="card p-3 h-100 shadow-sm">
+        <div class="d-flex justify-content-between">
+          <h6>Leads by Status</h6>
+          <small class="text-muted">Distribution</small>
+        </div>
+        <canvas id="statusChart" height="160"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div id="dashboard-errors" class="mt-3"></div>
+</div>
+
+<!-- libs -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+async function fetchJson(url){
+  const resp = await fetch(url, {credentials: 'same-origin'});
+  if(!resp.ok){
+    const txt = await resp.text();
+    throw new Error('Fetch error: ' + resp.status + '\n' + txt);
+  }
+  return resp.json();
+}
+
+function formatCurrency(v){ if(v===null || v===undefined) return '—'; return '৳ ' + Number(v).toLocaleString(); }
+
+document.addEventListener('DOMContentLoaded', async () => {
+  const errors = document.getElementById('dashboard-errors');
+  try {
+    const data = await fetchJson("{% url 'dashboard:api_summary' %}");
+
+    // Cards
+    document.getElementById('card-users').textContent = data.total_users ?? '—';
+    document.getElementById('card-users-new').textContent = data.new_users_last_30 ?? '—';
+    document.getElementById('card-leads').textContent = data.total_leads ?? '—';
+    document.getElementById('card-leads-conv').textContent = data.converted_leads ?? '—';
+    document.getElementById('card-commissions').textContent = data.total_commissions !== null ? formatCurrency(data.total_commissions) : '—';
+    document.getElementById('card-commissions-paid').textContent = data.total_commissions_paid !== null ? formatCurrency(data.total_commissions_paid) : '—';
+    document.getElementById('card-referrals').textContent = data.referrals_total ?? '—';
+    document.getElementById('card-referrals-30').textContent = data.referrals_last_30 ?? '—';
+
+    // Leads trend chart
+    const leadsCtx = document.getElementById('leadsChart').getContext('2d');
+    const leadsChart = new Chart(leadsCtx, {
+      type: 'line',
+      data: {
+        labels: data.lead_trend_days || [],
+        datasets: [{
+          label: 'New leads',
+          data: data.lead_trend_counts || [],
+          fill: true,
+          tension: 0.3,
+          borderWidth: 2,
+          pointRadius: 3,
+        }]
+      },
+      options: { plugins: { legend: { display: false } }, responsive: true }
+    });
+
+    // Leads by status (pie)
+    const statusCtx = document.getElementById('statusChart').getContext('2d');
+    const statusLabels = (data.lead_status_counts || []).map(x => x.status || (x.status ?? 'Unknown'));
+    const statusValues = (data.lead_status_counts || []).map(x => x.count || 0);
+    const statusChart = new Chart(statusCtx, {
+      type: 'doughnut',
+      data: {
+        labels: statusLabels,
+        datasets: [{
+          data: statusValues,
+          hoverOffset: 4,
+        }]
+      },
+      options:{ plugins: { legend: { position: 'right' } }, responsive: true }
+    });
+
+  } catch (err){
+    console.error(err);
+    const e = document.createElement('div');
+    e.className = 'alert alert-danger';
+    e.innerHTML = `<strong>Dashboard load error</strong><pre style="white-space:pre-wrap">${String(err)}</pre>`;
+    errors.appendChild(e);
+  }
+});
+</script>
+{% endblock %}

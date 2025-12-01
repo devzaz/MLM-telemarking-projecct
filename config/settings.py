@@ -50,15 +50,18 @@ INSTALLED_APPS = [
     'users',
     'mlm',
     'crm',
-    'telemarketing',
+    # 'telemarketing',
     'commissions',
     'dashboard',
     'api',
+    'referrals',
+    'reports'
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'referrals.middleware.ReferralTrackingMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -89,12 +92,12 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
 
 
 DATABASES = {
@@ -132,6 +135,31 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'referrals.auth.ApiKeyAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.TokenAuthentication'
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+}
+
+
+from datetime import timedelta
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=365),  # service tokens: long-lived - rotate periodically
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=0),
+    'ROTATE_REFRESH_TOKENS': False,
+    'ALGORITHM': 'HS256',
+    # Optionally set SIGNING_KEY if you want separate key
+    # 'SIGNING_KEY': 'your-very-secret-key-for-jwt',
+}
+
+
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
@@ -150,6 +178,7 @@ USE_TZ = True
 STATIC_URL = 'static/'
 
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -165,3 +194,45 @@ AUTH_USER_MODEL = 'users.User'
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/login/'
+
+
+EMAIL_BACKEND='django.core.mail.backends.console.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'zishanzubaer7@gmail.com'
+EMAIL_HOST_PASSWORD = 'qcns hmna owyr jcdw'
+
+
+ACCOUNT_ADAPTER = "users.allauth_adapter.MyAccountAdapter"
+
+
+# Cookie name & age (days)
+REFERRAL_COOKIE_NAME = 'referral_token'
+REFERRAL_COOKIE_AGE_DAYS = 180
+REFERRAL_COOKIE_SECURE = False  # set True in production with HTTPS
+
+#Have tp be true in production
+# REFERRAL_COOKIE_SECURE = True
+# SESSION_COOKIE_SECURE = True
+
+# Shared secret for API (generate a strong random string in prod)
+REFERRAL_SHARED_SECRET = 'change-this-to-a-strong-secret'  # replace in production
+
+
+# Commission engine configuration
+COMMISSION_DIRECT_RATE = 0.10       # 10% direct commission
+COMMISSION_BINARY_RATE = 0.05       # 5% binary/upline matching commission
+AUTO_APPROVE_COMMISSIONS = False    # if True, commissions auto-approved and wallets credited
+
+
+# settings.py (add near bottom)
+CELERY_BROKER_URL = 'redis://localhost:6379/0'        # install & run redis locally
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_BEAT_SCHEDULE = {
+    # We'll add beat tasks dynamically later; for a simple example:
+    # 'run-scheduled-reports-every-1-minute': {
+    #     'task': 'reports.tasks.run_scheduled_reports',
+    #     'schedule': 60.0,
+    # },
+}

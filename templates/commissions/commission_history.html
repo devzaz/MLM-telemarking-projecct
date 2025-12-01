@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Commission History{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{% static 'commissions/css/commissions.css' %}">
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Commission History</h2>
+    <a class="btn btn-outline-secondary" href="{% url 'commissions:wallet_summary' %}">Back to Wallets</a>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>Time</th><th>Telemarketer</th><th>Amount</th><th>Source</th><th>Status</th><th>Sale ref</th><th>Approved at</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for c in page %}
+            <tr>
+              <td>{{ c.created_at|date:"Y-m-d H:i" }}</td>
+              <td>{{ c.telemarketer.username }}</td>
+              <td>{{ c.amount }}</td>
+              <td>{{ c.source }}</td>
+              <td>{{ c.status }}</td>
+              <td>{{ c.sale_reference }}</td>
+              <td>{{ c.approved_at|default:"—" }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="7" class="text-muted">No commissions.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <nav aria-label="Page navigation">
+        <ul class="pagination">
+          {% if page.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ page.previous_page_number }}">Previous</a></li>{% else %}<li class="page-item disabled"><span class="page-link">Previous</span></li>{% endif %}
+          <li class="page-item active"><span class="page-link">{{ page.number }}</span></li>
+          {% if page.has_next %}<li class="page-item"><a class="page-link" href="?page={{ page.next_page_number }}">Next</a></li>{% else %}<li class="page-item disabled"><span class="page-link">Next</span></li>{% endif %}
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+{% endblock %}

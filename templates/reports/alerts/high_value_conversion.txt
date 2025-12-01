@@ -1,0 +1,8 @@
+High value conversions found for rule "{{ rule.name }}".
+
+Count: {{ conversions.count }}
+
+List:
+{% for c in conversions %}
+- Order {{ c.external_order_id }} Amount: {{ c.amount }} Referrer: {{ c.referrer }}
+{% endfor %}

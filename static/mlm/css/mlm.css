@@ -1,0 +1,10 @@
+/* stronger selectors to avoid admin CSS override */
+svg.mlm-tree-svg { display:block; width:100% !important; height:100% !important; background:#fff; border-radius:6px; }
+.mlm-link { fill:none; stroke:#1a73e8; stroke-width:2px; opacity:0.95; }
+.mlm-node-group { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial !important; }
+.mlm-node-rect { rx:10; ry:10; }
+.mlm-node-text { font-size:12px; pointer-events:none; dominant-baseline:middle; }
+.mlm-node-text.inactive { fill:#111827 !important; }
+.mlm-node-meta { font-size:11px; pointer-events:none; }
+.mlm-node-rect { transition: transform 120ms ease; }
+.mlm-node-group:hover { transform: translateY(-6px); }

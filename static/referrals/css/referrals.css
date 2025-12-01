@@ -1,0 +1,45 @@
+/* referrals.css - attractive dashboard & partner pages */
+.kpi-card {
+  border-radius: 12px;
+  padding: 18px;
+  color: #111827;
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.06);
+}
+.kpi-gradient {
+  background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+  color: #ffffff;
+}
+.kpi-ghost {
+  background: #ffffff;
+}
+.kpi-top { display:flex; justify-content:space-between; align-items:center; }
+.kpi-top h6 { margin:0; font-size:14px; color: inherit; opacity:0.9; }
+.kpi-value { font-size:28px; font-weight:700; }
+.kpi-foot { margin-top:10px; font-size:12px; color: rgba(0,0,0,0.6); }
+
+/* code blocks */
+.code-block {
+  background: #0f172a;
+  color: #e6eefc;
+  padding: 12px;
+  border-radius: 6px;
+  overflow:auto;
+  font-family: Menlo, Monaco, monospace;
+  font-size: 13px;
+}
+
+/* nice card styling for partner pages */
+.card .card-body h6 { margin-bottom: 8px; }
+.table thead th { font-weight:600; }
+
+/* responsive spacing */
+@media (max-width: 767px) {
+  .kpi-value { font-size: 22px; }
+}
+/* referrals.css — add at bottom */
+.card .card-body canvas#referralsMiniChart {
+  height: 120px;        /* desired chart height */
+  max-height: 160px;    /* prevent growing too tall on large screens */
+  width: 100% !important;
+  display: block;
+}

@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Leads | CRM{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{% static 'crm/css/datatables.css' %}">
+<div class="container-fluid">
+  <h3>Your Leads</h3>
+
+  <div class="row mb-3">
+    <div class="col-md-3">
+      <div class="card p-3">
+        <h6>Total</h6>
+        <h3>{{ dashboard.total }}</h3>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card p-3">
+        <h6>Converted</h6>
+        <h3>{{ dashboard.converted }}</h3>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card p-3">
+        <h6>Pending</h6>
+        <h3>{{ dashboard.pending }}</h3>
+      </div>
+    </div>
+    <div class="col-md-3 text-end">
+      <a class="btn btn-success" href="{% url 'crm:lead_create' %}">Add Lead</a>
+      <a class="btn btn-outline-secondary" href="{% url 'crm:lead_import_csv' %}">Import CSV</a>
+    </div>
+  </div>
+
+  <div class="card p-3">
+    <div class="row mb-2">
+      <div class="col-md-3">
+        <select id="filter-status" class="form-select">
+          <option value="">All statuses</option>
+          {% for val, label in statuses %}
+            <option value="{{ val }}">{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3">
+        <select id="filter-assigned" class="form-select">
+          <option value="">All telemarketers</option>
+          {% for tm in telemarketers %}
+            <option value="{{ tm.id }}">{{ tm.username }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+
+    <table id="leads-table" class="table table-striped" style="width:100%">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th>Status</th>
+          <th>Assigned</th>
+          <th>Created</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
+
+<script src="{% static 'crm/js/leads_datatables.js' %}"></script>
+{% endblock %}

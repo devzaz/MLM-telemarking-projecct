@@ -28,12 +28,12 @@
     <!-- Login / Logout Buttons -->
     <div class="ms-3">
       {% if user.is_authenticated %}
-        <form method="post" action="{% url 'logout' %}" class="d-inline">
+        <form method="post" action="{% url 'users:logout' %}" class="d-inline">
           {% csrf_token %}
           <button type="submit" class="btn btn-outline-danger btn-sm">Logout</button>
         </form>
       {% else %}
-        <a href="{% url 'login' %}" class="btn btn-outline-primary btn-sm">Login</a>
+        <a href="{% url 'users:login' %}" class="btn btn-outline-primary btn-sm">Login</a>
       {% endif %}
     </div>
   </div>

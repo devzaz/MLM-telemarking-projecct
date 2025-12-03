@@ -1,42 +1,79 @@
 <div class="bg-dark text-white p-3 vh-100" id="sidebar">
     <h4 class="text-center mb-4">SSB CRM</h4>
     <ul class="nav flex-column">
+
         <li class="nav-item"><a class="nav-link text-white" href="/">Dashboard</a></li>
         <li class="nav-item"><a class="nav-link text-white" href="#">Leads</a></li>
+
         <li class="nav-item">
-            <a class="nav-link d-flex align-items-center" href="{% url 'mlm:user_network' %}">
+            <a class="nav-link d-flex align-items-center text-white" href="{% url 'mlm:user_network' %}">
                 <i class="fa fa-sitemap me-2" aria-hidden="true"></i>
                 <span>MLM Network</span>
             </a>
         </li>
 
-
         {% if request.user.is_authenticated and request.user.role in "admin,telemarketer" %}
         <li class="nav-item">
-            <a class="nav-link" href="{% url 'crm:lead_list' %}">CRM / Leads</a>
+            <a class="nav-link text-white" href="{% url 'crm:lead_list' %}">CRM / Leads</a>
         </li>
         {% endif %}
 
         {% if request.user.is_staff %}
             <li class="nav-item">
-                {# link to the attractive referrals dashboard page (staff-only) #}
-                <a class="nav-link" href="{% url 'referrals:referrals_dashboard_page' %}">Referral Dashboard</a>
+                <a class="nav-link text-white" href="{% url 'referrals:referrals_dashboard_page' %}">
+                    Referral Dashboard
+                </a>
             </li>
         {% endif %}
 
         {% if request.user.is_authenticated %}
-        {% if request.user.is_staff %}
-            <li class="nav-item"><a class="nav-link" href="{% url 'commissions:wallet_summary' %}">Commissions</a></li>
-        {% elif request.user.role == 'telemarketer' %}
-            <li class="nav-item"><a class="nav-link" href="{% url 'commissions:commission_history' %}">My Commissions</a></li>
+            {% if request.user.is_staff %}
+                <li class="nav-item">
+                    <a class="nav-link text-white" href="{% url 'commissions:wallet_summary' %}">Commissions</a>
+                </li>
+            {% elif request.user.role == 'telemarketer' %}
+                <li class="nav-item">
+                    <a class="nav-link text-white" href="{% url 'commissions:commission_history' %}">
+                        My Commissions
+                    </a>
+                </li>
+            {% endif %}
         {% endif %}
+
+        <!-- ====================== -->
+        <!-- ✅ PAYOUTS ADDED HERE -->
+        <!-- ====================== -->
+
+        {% if request.user.is_authenticated %}
+            {% if request.user.is_staff %}
+                <!-- Admin sees approval page -->
+                <li class="nav-item">
+                    <a class="nav-link text-white" href="{% url 'payments:payout_admin_list' %}">
+                        Payout Approvals
+                    </a>
+                </li>
+            {% elif request.user.role == 'telemarketer' %}
+                <!-- Telemarketer sees request page -->
+                <li class="nav-item">
+                    <a class="nav-link text-white" href="{% url 'payments:payout_request' %}">
+                        Request Payout
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white" href="{% url 'payments:payout_history' %}">
+                        My Payouts
+                    </a>
+                </li>
+            {% endif %}
         {% endif %}
 
+        <!-- ====================== -->
 
+        <li class="nav-item"><a class="nav-link text-white" href="{% url 'reports:reports_list' %}">Report</a></li>
 
-        <li class="nav-item"><a class="nav-link text-white" href="{% url "reports:reports_list" %}">Report</a></li>
         <li class="nav-item"><a class="nav-link text-white" href="#">Network</a></li>
         <li class="nav-item"><a class="nav-link text-white" href="#">Commissions</a></li>
         <li class="nav-item"><a class="nav-link text-white" href="#">Settings</a></li>
+
     </ul>
 </div>

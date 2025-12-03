@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-4">
+  <h3>Payout {{ pr.request_id }}</h3>
+  <dl class="row">
+    <dt class="col-sm-3">User</dt><dd class="col-sm-9">{{ pr.user }}</dd>
+    <dt class="col-sm-3">Amount</dt><dd class="col-sm-9">{{ pr.amount }} {{ pr.currency }}</dd>
+    <dt class="col-sm-3">Method</dt><dd class="col-sm-9">{{ pr.method }}</dd>
+    <dt class="col-sm-3">Details</dt><dd class="col-sm-9"><pre>{{ pr.details|json_script:"details" }}</pre></dd>
+    <dt class="col-sm-3">Status</dt><dd class="col-sm-9">{{ pr.status }}</dd>
+    <dt class="col-sm-3">Created</dt><dd class="col-sm-9">{{ pr.created_at|date:"Y-m-d H:i" }}</dd>
+  </dl>
+
+  {% if user.is_staff %}
+  <form method="post" action="{% url 'payments:process' pr.pk %}">
+    {% csrf_token %}
+    <div class="mb-3">
+      <label>Admin note</label>
+      <textarea name="admin_note" class="form-control"></textarea>
+    </div>
+    <button name="action" value="approve" class="btn btn-success">Approve</button>
+    <button name="action" value="reject" class="btn btn-danger">Reject</button>
+    <button name="action" value="mark_paid" class="btn btn-primary">Mark Paid</button>
+  </form>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,48 @@
+{% load static %}
+<div class="dropdown">
+  <button class="btn btn-light position-relative" id="notifDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+    <i class="fa-solid fa-bell"></i>
+    <span id="notif-count" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="display:none">0</span>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end p-2" style="min-width:320px;" id="notif-list">
+    <li class="text-center text-muted small">Loading...</li>
+  </ul>
+</div>
+
+<script>
+async function fetchNotifs(){
+  try{
+    const res = await fetch('/notifications/unread_json/', {credentials:'same-origin'});
+    if(!res.ok) throw new Error('fetch error');
+    const data = await res.json();
+    const countEl = document.getElementById('notif-count');
+    const list = document.getElementById('notif-list');
+    if(data.unread_count > 0){
+      countEl.style.display='inline-block';
+      countEl.textContent = data.unread_count;
+    } else {
+      countEl.style.display='none';
+    }
+    list.innerHTML = '';
+    if(data.items && data.items.length){
+      for(const it of data.items){
+        const li = document.createElement('li');
+        li.innerHTML = `<a class="dropdown-item" href="${it.url||'#'}"><strong>${it.title}</strong><div class="small text-muted">${it.message}</div><small class="text-muted">${it.time}</small></a>`;
+        list.appendChild(li);
+      }
+      const foot = document.createElement('li');
+      foot.innerHTML = `<div class="text-center mt-2"><a href="/notifications/" class="small">View all</a></div>`;
+      list.appendChild(foot);
+    } else {
+      list.innerHTML = '<li class="text-center small text-muted">No notifications</li>';
+    }
+  }catch(e){
+    console.error('notifs fetch', e);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', function(){
+  fetchNotifs();
+  setInterval(fetchNotifs, 15000); // poll every 15s
+});
+</script>

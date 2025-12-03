@@ -55,7 +55,9 @@ INSTALLED_APPS = [
     'dashboard',
     'api',
     'referrals',
-    'reports'
+    'reports',
+    'payments',
+    'notifications',
 ]
 
 MIDDLEWARE = [
@@ -236,3 +238,13 @@ CELERY_BEAT_SCHEDULE = {
     #     'schedule': 60.0,
     # },
 }
+
+
+# Twilio (optional)
+TWILIO_ACCOUNT_SID = config('TWILIO_ACCOUNT_SID', default='')
+TWILIO_AUTH_TOKEN = config('TWILIO_AUTH_TOKEN', default='')
+TWILIO_FROM_NUMBER = config('TWILIO_FROM_NUMBER', default='')
+
+# Notification toggles
+NOTIFICATIONS_SEND_EMAIL = config('NOTIFICATIONS_SEND_EMAIL', default='True') == 'True'
+NOTIFICATIONS_SEND_SMS = config('NOTIFICATIONS_SEND_SMS', default='False') == 'True'

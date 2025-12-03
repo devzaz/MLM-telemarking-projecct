@@ -12,6 +12,9 @@ urlpatterns = [
     path('commissions/', include('commissions.urls', namespace='commissions')),
     path('api/', include('api.urls')),
     path('reports/', include('reports.urls', namespace='reports')),
+    path('payments/', include('payments.urls', namespace='payments')),
+    path('notifications/', include('notifications.urls', namespace='notifications')),
+
 
 
 

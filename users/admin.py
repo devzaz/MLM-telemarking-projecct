@@ -3,7 +3,7 @@ from .models import User
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('username','email','role','is_verified','is_approved')
+    list_display = ('id','username','email','role','is_verified','is_approved')
     list_filter = ('role','is_verified','is_approved')
     actions = ['approve_users']
 

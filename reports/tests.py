@@ -13,3 +13,5 @@ class ReportTests(TestCase):
         self.client.login(username='t1', password='pw')
         resp = self.client.post('/api/reports/reports/', {'name':'My test','filters':{}}, content_type='application/json')
         self.assertIn(resp.status_code, (200,201,201))
+
+

@@ -19,6 +19,11 @@ class User(AbstractUser):
     phone = models.CharField(max_length=20, blank=True, null=True)
 
 
+    # NEW FIELDS for email verification
+    verification_token = models.CharField(max_length=64, blank=True, null=True, db_index=True)
+    verification_sent_at = models.DateTimeField(blank=True, null=True)
+
+
     def save(self, *args, **kwargs):
         if not self.referral_code:
             self.referral_code = str(uuid.uuid4())[:8].upper()

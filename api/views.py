@@ -1,8 +1,3 @@
-# api/views.py
-
-# from rest_framework.permissions import AllowAny
-# DEFAULT_PERMISSION = AllowAny
-# and use DEFAULT_PERMISSION or set permission_classes = [AllowAny] on the view
 
 
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
